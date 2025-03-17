@@ -1,0 +1,7 @@
+{
+  "name": "viajando-app",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
