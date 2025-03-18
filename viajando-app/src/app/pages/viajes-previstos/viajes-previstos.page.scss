@@ -1,0 +1,14 @@
+ion-content {
+    --background: var(--ion-color-light); // Color de fondo del contenido
+  }
+  
+  h1 {
+    color: var(--ion-color-primary); // Color del título
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  p {
+    color: var(--ion-color-dark); // Color del texto
+    font-size: 16px;
+  }
