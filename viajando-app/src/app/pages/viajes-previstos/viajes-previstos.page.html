@@ -1,15 +1,24 @@
 <ion-header>
   <ion-toolbar color="primary">
     <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button> <!-- Botón para abrir el menú -->
+      <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>Viajes previstos</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content class="ion-padding">
-  <!-- Contenido de tu página -->
-  <h2>Listado de viajes previstos</h2>
-  <!-- Aquí pones tu contenido -->
-</ion-content>
+  <ion-button expand="block" (click)="addViaje()">+ Añadir viaje</ion-button>
 
+  <ion-list>
+    <ion-item *ngFor="let viaje of viajes">
+      <ion-label>
+        <h2>{{ viaje.destino }} ({{ viaje.fecha }})</h2>
+        <p>{{ viaje.descripcion }}</p>
+      </ion-label>
+      <ion-button color="danger" fill="clear" slot="end" (click)="deleteViaje(viaje.id)">
+        <ion-icon slot="icon-only" name="trash"></ion-icon>
+      </ion-button>
+    </ion-item>
+  </ion-list>
+</ion-content>
