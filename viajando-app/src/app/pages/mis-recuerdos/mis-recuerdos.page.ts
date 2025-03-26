@@ -6,6 +6,6 @@ import { IonicModule } from '@ionic/angular';
   standalone: true,
   imports: [IonicModule],
   templateUrl: './mis-recuerdos.page.html',
-  styleUrls: ['./mis-recuerdos.page.css']
+  styleUrls: ['./mis-recuerdos.page.scss']
 })
 export class MisRecuerdosPage {}

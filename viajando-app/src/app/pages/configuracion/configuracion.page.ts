@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
   standalone: true,
   imports: [IonicModule],
   templateUrl: './configuracion.page.html',
-  styleUrls: ['./configuracion.page.css']
+  styleUrls: ['./configuracion.page.scss']  // Cambié de .css a .scss
 })
 export class ConfiguracionPage {}
+

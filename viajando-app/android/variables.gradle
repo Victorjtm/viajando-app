@@ -1,7 +1,7 @@
 ext {
-    minSdkVersion = 21  // Soporta desde Android 5.0 (Lollipop)
-    compileSdkVersion = 35  // Cambia esto a 34 o 35
-    targetSdkVersion = 35  // Cambia esto a 34 o 35
+    minSdkVersion = 23
+    compileSdkVersion = 35
+    targetSdkVersion = 35
     androidxActivityVersion = '1.9.2'
     androidxAppCompatVersion = '1.7.0'
     androidxCoordinatorLayoutVersion = '1.2.0'

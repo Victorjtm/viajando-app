@@ -6,7 +6,7 @@ import { IonicModule } from '@ionic/angular';
   standalone: true,
   imports: [IonicModule],
   templateUrl: './generar-recuerdo.page.html',
-  styleUrls: ['./generar-recuerdo.page.css']
+  styleUrls: ['./generar-recuerdo.page.scss']
 })
 export class GenerarRecuerdoPage {}
 
