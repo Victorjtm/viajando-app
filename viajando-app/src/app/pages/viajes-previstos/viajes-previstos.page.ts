@@ -1,60 +1,124 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonicModule, AlertController, IonButton, IonList, IonItem, IonLabel, IonIcon } from '@ionic/angular';
-import { DatabaseService } from 'src/app/services/database.service';
+import { 
+  AlertController, 
+  IonButton, 
+  IonList, 
+  IonItem, 
+  IonLabel, 
+  IonIcon, 
+  IonHeader, 
+  IonToolbar, 
+  IonTitle, 
+  IonContent,
+  IonButtons,
+  IonMenuButton
+} from '@ionic/angular/standalone';
+import { DatabaseService } from '../../services/database.service';
 
 @Component({
   selector: 'app-viajes-previstos',
+  templateUrl: './viajes-previstos.page.html',
+  styleUrls: ['./viajes-previstos.page.scss'],
   standalone: true,
   imports: [
     CommonModule,
-    IonicModule
-  ],
-  templateUrl: './viajes-previstos.page.html',
-  styleUrls: ['./viajes-previstos.page.scss'],
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonButton,
+    IonList,
+    IonItem,
+    IonLabel,
+    IonIcon,
+    IonButtons,
+    IonMenuButton
+  ]
 })
 export class ViajesPrevistosPage implements OnInit {
   viajes: any[] = [];
 
-  constructor(private db: DatabaseService, private alertCtrl: AlertController) {}
+  constructor(
+    private db: DatabaseService,
+    private alertCtrl: AlertController
+  ) {}
 
   async ngOnInit() {
-    await this.db.initDB();
-    await this.db.seedViajes();  // Este método solo se usa para inicializar datos de prueba, puedes eliminarlo si no lo necesitas
-    await this.loadViajes();  // Carga los viajes de la base de datos
+    await this.initializeDatabase();
   }
 
-  // Método para cargar los viajes desde la base de datos
-  async loadViajes() {
+  private async initializeDatabase(): Promise<void> {
+    try {
+      await this.db.initDB();
+      await this.loadViajes();
+    } catch (error) {
+      console.error('Error inicializando base de datos:', error);
+    }
+  }
+
+  async loadViajes(): Promise<void> {
     this.viajes = await this.db.getViajes();
+    console.log('Viajes cargados:', this.viajes);
   }
 
-  // Método para añadir un nuevo viaje
-  async addViaje() {
+  async addViaje(): Promise<void> {
     const alert = await this.alertCtrl.create({
       header: 'Nuevo viaje',
       inputs: [
-        { name: 'destino', placeholder: 'Destino', type: 'text' },
-        { name: 'fecha', placeholder: 'Fecha', type: 'date' },
-        { name: 'descripcion', placeholder: 'Descripción', type: 'textarea' },
+        { 
+          name: 'destino', 
+          placeholder: 'Destino', 
+          type: 'text',
+          attributes: {
+            required: true
+          }
+        },
+        { 
+          name: 'fecha', 
+          type: 'date',
+          attributes: {
+            required: true
+          }
+        },
+        { 
+          name: 'descripcion', 
+          placeholder: 'Descripción (opcional)', 
+          type: 'textarea' 
+        }
       ],
       buttons: [
-        { text: 'Cancelar', role: 'cancel' },
+        { 
+          text: 'Cancelar', 
+          role: 'cancel' 
+        },
         {
           text: 'Guardar',
-          handler: async data => {
-            await this.db.addViaje(data.destino, data.fecha, data.descripcion);  // Inserta el nuevo viaje en la base de datos
-            await this.loadViajes();  // Vuelve a cargar la lista de viajes
+          handler: async (data) => {
+            if (data.destino && data.fecha) {
+              await this.db.addViaje(data.destino, data.fecha, data.descripcion || '');
+              await this.loadViajes();
+              return true;
+            }
+            return false;
           }
         }
       ]
     });
+
     await alert.present();
   }
 
-  // Método para eliminar un viaje
-  async deleteViaje(id: number) {
-    await this.db.deleteViaje(id);  // Elimina el viaje de la base de datos
-    await this.loadViajes();  // Vuelve a cargar la lista de viajes
+  async deleteViaje(id: number): Promise<void> {
+    await this.db.deleteViaje(id);
+    await this.loadViajes();
+  }
+
+  formatDate(timestamp: number): string {
+    return new Date(timestamp).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 }

@@ -13,6 +13,8 @@ import {
   IonIcon,
   IonLabel,
 } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { airplane, camera, images, settings, trash } from 'ionicons/icons';
 
 @Component({
   selector: 'app-root',
@@ -31,7 +33,17 @@ import {
     IonIcon,
     IonLabel,
   ],
+  standalone: true
 })
 export class AppComponent {
-  constructor() {}
+  constructor() {
+    // Registra todos los iconos que uses en la aplicación
+    addIcons({
+      airplane,  // Para el menú de viajes
+      camera,    // Para generar recuerdos
+      images,    // Para mis recuerdos
+      settings,  // Para configuración
+      trash      // Para el botón de eliminar
+    });
+  }
 }
