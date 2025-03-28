@@ -13,10 +13,14 @@ interface Viaje {
 export class DatabaseService {
   private db!: SQLiteDBConnection;
   private readonly isNative = Capacitor.isNativePlatform();
-  private webStorage = new Map<string, Viaje[]>(); // Fallback simple para web
+  private webStorage = new Map<string, Viaje[]>();
+  private isInitialized = false;
 
   constructor() {
-    // Inicializa con datos de prueba en web
+    this.initWebData();
+  }
+
+  private initWebData(): void {
     if (!this.isNative && !this.webStorage.has('viajes')) {
       this.webStorage.set('viajes', [
         {
@@ -36,28 +40,39 @@ export class DatabaseService {
   }
 
   async initDB(): Promise<void> {
+    if (this.isInitialized) {
+      console.log('Base de datos ya inicializada');
+      return;
+    }
+
     if (this.isNative) {
       try {
-        const ret = await CapacitorSQLite.createConnection({ 
-          database: 'viajesDB', 
-          version: 1 
+        console.log('🟢 Inicializando SQLite...');
+        const ret = await CapacitorSQLite.createConnection({
+          database: 'viajesDB',
+          version: 1
         });
         this.db = (ret as any).connection as SQLiteDBConnection;
         await this.db.open();
         await this.createTable();
-        console.log('✅ SQLite inicializada en modo nativo');
+
+        // Verificación
+        const tables = await this.db.query('SELECT name FROM sqlite_master WHERE type="table"');
+        console.log('📦 Tablas existentes:', tables.values);
+
+        this.isInitialized = true;
+        console.log('✅ SQLite inicializada correctamente');
       } catch (error) {
-        console.error('❌ Error al iniciar SQLite:', error);
+        console.error('🔴 Error al iniciar SQLite:', error);
         throw error;
       }
     } else {
-      console.log('✅ Modo web: usando almacenamiento en memoria');
+      console.log('🌐 Modo web: usando almacenamiento en memoria');
+      this.isInitialized = true;
     }
   }
 
   private async createTable(): Promise<void> {
-    if (!this.isNative) return;
-
     await this.db.execute(`
       CREATE TABLE IF NOT EXISTS viajes (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,9 +81,12 @@ export class DatabaseService {
         descripcion TEXT
       );
     `);
+    console.log('🟡 Tabla "viajes" verificada');
   }
 
   async getViajes(): Promise<Viaje[]> {
+    if (!this.isInitialized) await this.initDB();
+
     if (this.isNative) {
       const res = await this.db.query('SELECT * FROM viajes');
       return res.values?.map(v => ({
@@ -77,17 +95,18 @@ export class DatabaseService {
         fecha: v.fecha,
         descripcion: v.descripcion
       })) || [];
-    } else {
-      return this.webStorage.get('viajes') || [];
     }
+    return this.webStorage.get('viajes') || [];
   }
 
   async addViaje(destino: string, fecha: string, descripcion: string = ''): Promise<void> {
+    if (!this.isInitialized) await this.initDB();
+
     const timestamp = new Date(fecha).getTime();
-    
+
     if (this.isNative) {
       await this.db.run(
-        'INSERT INTO viajes (destino, fecha, descripcion) VALUES (?, ?, ?)', 
+        'INSERT INTO viajes (destino, fecha, descripcion) VALUES (?, ?, ?)',
         [destino, timestamp, descripcion]
       );
     } else {
@@ -104,21 +123,25 @@ export class DatabaseService {
   }
 
   async deleteViaje(id: number): Promise<void> {
+    if (!this.isInitialized) await this.initDB();
+
     if (this.isNative) {
       await this.db.run('DELETE FROM viajes WHERE id = ?', [id]);
     } else {
       const viajes = (this.webStorage.get('viajes') || []).filter(v => v.id !== id);
       this.webStorage.set('viajes', viajes);
     }
-    console.log('✅ Viaje eliminado ID:', id);
+    console.log('🗑️ Viaje eliminado ID:', id);
   }
 
   async updateViaje(id: number, destino: string, fecha: string, descripcion: string): Promise<void> {
+    if (!this.isInitialized) await this.initDB();
+
     const timestamp = new Date(fecha).getTime();
 
     if (this.isNative) {
       await this.db.run(
-        'UPDATE viajes SET destino = ?, fecha = ?, descripcion = ? WHERE id = ?', 
+        'UPDATE viajes SET destino = ?, fecha = ?, descripcion = ? WHERE id = ?',
         [destino, timestamp, descripcion, id]
       );
     } else {
@@ -129,6 +152,6 @@ export class DatabaseService {
         this.webStorage.set('viajes', viajes);
       }
     }
-    console.log('✅ Viaje actualizado ID:', id);
+    console.log('✏️ Viaje actualizado ID:', id);
   }
 }

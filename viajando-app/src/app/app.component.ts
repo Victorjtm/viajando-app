@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   IonApp,
   IonRouterOutlet,
@@ -15,10 +15,13 @@ import {
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { airplane, camera, images, settings, trash } from 'ionicons/icons';
+import { DatabaseService } from './services/database.service';
+import { Platform } from '@ionic/angular';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
+  styleUrls: ['app.component.scss'],
   imports: [
     IonApp,
     IonRouterOutlet,
@@ -36,14 +39,37 @@ import { airplane, camera, images, settings, trash } from 'ionicons/icons';
   standalone: true
 })
 export class AppComponent {
-  constructor() {
-    // Registra todos los iconos que uses en la aplicación
-    addIcons({
-      airplane,  // Para el menú de viajes
-      camera,    // Para generar recuerdos
-      images,    // Para mis recuerdos
-      settings,  // Para configuración
-      trash      // Para el botón de eliminar
-    });
+
+  constructor(
+    private database: DatabaseService,
+    private platform: Platform
+  ) {
+    console.log('🔵 Constructor de AppComponent llamado');
+    addIcons({ airplane, camera, images, settings, trash });
+
+    // Inicializar la base de datos en el constructor
+    this.initializeApp();
+  }
+
+  private async initializeApp() {
+    console.log('🟢 initializeApp() ejecutándose');
+
+    try {
+      console.log('🕒 Esperando platform.ready()...');
+      await this.platform.ready();
+      console.log('✅ Platform ready');
+
+      console.log('🔥 TEST: Inicializando base de datos...');
+      await this.database.initDB();
+
+      console.log('📦 Obteniendo viajes existentes...');
+      const viajes = await this.database.getViajes();
+      console.log('🔥 TEST: Viajes existentes:', JSON.stringify(viajes));
+
+      console.log('🚀 App inicializada correctamente');
+    } catch (error) {
+      console.error('🔴 Error crítico:', error);
+      throw error; // Propaga el error para verlo en consola
+    }
   }
 }
